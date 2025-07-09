@@ -13,8 +13,17 @@ namespace Task_Tracker
     /// </summary>
     internal class TaskManager
     {
+
         // List to store tasks
         private List<TaskItem> tasks = new List<TaskItem>();
+
+        /// <summary>
+        /// Print a message and wait for user input to continue
+        /// </summary>
+        private void Pause() { 
+            Console.WriteLine("Press Enter to continue...");
+            Console.ReadLine();
+        }
 
         /// <summary>
         /// Print a numbered list of the task names and their statuses
@@ -31,6 +40,7 @@ namespace Task_Tracker
         /// <summary> 
         /// Get the user's choice of task from the list 
         /// </summary>
+        /// <returns>Index of the selected task, or -1 if invalid</returns>
         private int ChooseTask()
         {
             ListTasks();
@@ -63,22 +73,29 @@ namespace Task_Tracker
         /// <summary>
         /// Choose a value from a list of enum values
         /// </summary>
+        /// <returns>Index of the selected enum value, or -1 if invalid</returns>
+        /// <param name="message">Prompt message</param>
+        /// <param name="allowEmpty">Whether to allow empty input</param>
         /// <typeparam name="T">An enumeration to be listed</typeparam>
-        private int ChooseEnumValue<T>(string message = "Choose an option: ")
+        private int? ChooseEnumValue<T>(string message = "Choose an option: ", bool allowEmpty = false)
         {
-            // List the enum values and prompt for selection
             ListEnumValues<T>();
             Console.Write(message);
-            // Read user input, parse it to an integer, and check if it's valid, returning the index of the selected value
-            if (int.TryParse(Console.ReadLine(), out int choice) &&
-                    choice >= 1 && choice <= Enum.GetValues(typeof(T)).Length)
+            string input = Console.ReadLine();
+
+            // If input is empty and allowEmpty is true, return null; otherwise, return -1
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return allowEmpty ? (int?)null : -1;
+            }
+            // Try to parse the input as an integer
+            else if (int.TryParse(input, out int choice) &&
+                choice >= 1 && choice <= Enum.GetValues(typeof(T)).Length)
             {
                 return choice - 1;
             }
-            else
-            {
-                return -1;
-            }
+            // If parsing fails or the choice is out of range, return -1
+            return -1;
         }
 
         /// <summary>
@@ -98,14 +115,18 @@ namespace Task_Tracker
             string description = Console.ReadLine();
 
             // Priority
-            Console.WriteLine($"Available priorities:");
-            int priorityIndex = ChooseEnumValue<TaskPriority>("Enter Priority: ");
-            TaskPriority priority = (priorityIndex > -1) ? (TaskPriority)priorityIndex : TaskPriority.Medium;
+            Console.WriteLine("Available priorities:");
+            int? priorityIndex = ChooseEnumValue<TaskPriority>("Enter Priority: ");
+            TaskPriority priority = (priorityIndex.HasValue && priorityIndex.Value > -1)
+                ? (TaskPriority)priorityIndex.Value
+                : TaskPriority.Medium;
 
             // Status
-            Console.WriteLine($"Available statuses:");
-            int statusIndex = ChooseEnumValue<TaskStatus>("Enter status: ");
-            TaskStatus status = (statusIndex > -1) ? (TaskStatus)statusIndex : TaskStatus.Pending;
+            Console.WriteLine("Available statuses:");
+            int? statusIndex = ChooseEnumValue<TaskStatus>("Enter status: ");
+            TaskStatus status = (statusIndex.HasValue && statusIndex.Value > -1)
+                ? (TaskStatus)statusIndex.Value
+                : TaskStatus.Pending;
 
             Console.Write("Enter Due Date (yyyy-mm-dd) or leave empty for none: ");
             // Try to parse the due date, assignigning null if parsing fails
@@ -122,8 +143,8 @@ namespace Task_Tracker
                 DueDate = due
             });
 
-            Console.WriteLine("Task added! Press Enter to continue.");
-            Console.ReadLine();
+            Console.WriteLine("Task added!");
+            Pause();
         }
 
         /// <summary>
@@ -140,11 +161,10 @@ namespace Task_Tracker
             }
             else
             {
-                tasks.ForEach(task => Console.WriteLine(task));
+                foreach (var task in tasks) { Console.WriteLine(task); }
             }
 
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -174,8 +194,7 @@ namespace Task_Tracker
                     Console.WriteLine("Invalid selection.");
                 }
             }
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -211,13 +230,15 @@ namespace Task_Tracker
 
                     // Priority
                     Console.WriteLine($"Priority [{task.Priority}]: ");
-                    input = ChooseEnumValue<TaskPriority>("Enter new priority (or leave empty to keep current): ").ToString();
-                    task.Priority = ((int.Parse(input) > -1)) ? (TaskPriority)int.Parse(input) : task.Priority;
-                        
+                    int? priorityIndex = ChooseEnumValue<TaskPriority>("Enter new priority (or leave empty to keep current): ", true);
+                    if (priorityIndex.HasValue && priorityIndex.Value > -1)
+                        task.Priority = (TaskPriority)priorityIndex.Value;
+
                     // Status
                     Console.WriteLine($"Status [{task.Status}]: ");
-                    input = ChooseEnumValue<TaskStatus>("Enter new status (or leave empty to keep current): ").ToString();
-                    task.Status = ((int.Parse(input) > -1)) ? (TaskStatus)int.Parse(input) : task.Status;
+                    int? statusIndex = ChooseEnumValue<TaskStatus>("Enter new status (or leave empty to keep current): ", true);
+                    if (statusIndex.HasValue && statusIndex.Value > -1)
+                        task.Status = (TaskStatus)statusIndex.Value;
 
                     // Due Date
                     Console.WriteLine($"Due Date [{(task.DueDate.HasValue ? task.DueDate.Value.ToString("yyyy-MM-dd") : "N/A")}]");
@@ -232,8 +253,7 @@ namespace Task_Tracker
                     Console.WriteLine("Invalid selection.");
                 }
             }
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -256,14 +276,14 @@ namespace Task_Tracker
                 {
                     // Remove the selected task
                     tasks.RemoveAt(taskIndex);
+                    Console.WriteLine("Task removed.");
                 }
                 else
                 {
                     Console.WriteLine("Invalid selection.");
                 }
             }
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -280,17 +300,16 @@ namespace Task_Tracker
 
             if (filterType == "1")
             {
-                int statusIndex = ChooseEnumValue<TaskStatus>("Select status: ");
-                if (statusIndex > -1)
+                int? statusIndex = ChooseEnumValue<TaskStatus>("Select status: ");
+                if (statusIndex.HasValue && statusIndex.Value > -1)
                 {
-                    var status = (TaskStatus)statusIndex;
+                    var status = (TaskStatus)statusIndex.Value;
                     var filtered = tasks.Where(t => t.Status == status);
 
                     if (!filtered.Any())
                     {
                         Console.WriteLine("No tasks found with the selected status.");
-                        Console.WriteLine("Press Enter to continue.");
-                        Console.ReadLine();
+                        Pause();
                         return;
                     }
                     else
@@ -309,17 +328,16 @@ namespace Task_Tracker
             }
             else if (filterType == "2")
             {
-                int priorityIndex = ChooseEnumValue<TaskPriority>("Select priority: ");
-                if (priorityIndex > -1)
+                int? priorityIndex = ChooseEnumValue<TaskPriority>("Select priority: ");
+                if (priorityIndex.HasValue && priorityIndex.Value > -1)
                 {
-                    var priority = (TaskPriority)priorityIndex;
+                    var priority = (TaskPriority)priorityIndex.Value;
                     var filtered = tasks.Where(t => t.Priority == priority);
 
                     if (!filtered.Any())
                     {
-                        Console.WriteLine("No tasks found with the selected status.");
-                        Console.WriteLine("Press Enter to continue.");
-                        Console.ReadLine();
+                        Console.WriteLine("No tasks found with the selected priority.");
+                        Pause();
                         return;
                     }
                     else
@@ -341,8 +359,7 @@ namespace Task_Tracker
                 Console.WriteLine("Invalid filter type.");
             }
 
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -352,6 +369,21 @@ namespace Task_Tracker
         {
             Console.Clear();
             Console.WriteLine("== SAVE TASKS ==");
+
+            // Check if there are no tasks to save, and prompt the user for confirmation
+            if (!tasks.Any())
+            {
+                Console.WriteLine("Warning: There are no tasks to save.");
+                Console.WriteLine("If you continue, the tasks file will be overwritten and left blank.");
+                Console.Write("Do you want to overwrite the file? (Y/N): ");
+                var input = Console.ReadLine();
+                if (!string.Equals(input, "Y", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Save cancelled.");
+                    Pause();
+                    return;
+                }
+            }
 
             try
             {
@@ -365,8 +397,7 @@ namespace Task_Tracker
                 // Catch any exceptions that occur during file operations and print the error message
                 Console.WriteLine($"Error saving: {e.Message}");
             }
-            Console.WriteLine("Press Enter to continue.");
-            Console.ReadLine();
+            Pause();
         }
 
         /// <summary>
@@ -427,15 +458,14 @@ namespace Task_Tracker
             }
             catch (FileNotFoundException)
             {
-                Console.WriteLine("Error laoding: File not found.");
+                Console.WriteLine("Error loading: File not found.");
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Error loading: {e.Message}");
             }
             if (!startup){
-                Console.WriteLine("Press Enter to continue.");
-                Console.ReadLine();
+                Pause();
             }
         }
     }
