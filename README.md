@@ -1,6 +1,6 @@
 # Task Tracker Console App
 
-A simple C# console application for tracking tasks, built to provide practical experience and demonstrate key C# concepts such as classes, enums, collections, file I/O, user input handling, and basic application structure.
+A simple C# console application for tracking tasks, built to gain practical experience and demonstrate key C# concepts such as classes, enums, collections, file I/O, user input handling, and basic application structure.
 
 ## Features
 
