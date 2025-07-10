@@ -274,9 +274,19 @@ namespace Task_Tracker
                 int taskIndex = ChooseTask();
                 if (taskIndex > -1)
                 {
-                    // Remove the selected task
-                    tasks.RemoveAt(taskIndex);
-                    Console.WriteLine("Task removed.");
+                    // Prompt for confirmation
+                    Console.WriteLine($"Are you sure you want to remove the task: {tasks[taskIndex].Title}? (Y/N)");
+                    string input = Console.ReadLine();
+                    if (string.Equals(input, "Y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Remove the selected task
+                        tasks.RemoveAt(taskIndex);
+                        Console.WriteLine("Task removed.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Removal cancelled.");
+                    }
                 }
                 else
                 {
