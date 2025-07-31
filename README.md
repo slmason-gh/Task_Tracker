@@ -22,7 +22,7 @@ A simple C# console application for tracking tasks, built to gain practical expe
 
 1. Clone this repository:
     ```sh
-    git clone https://github.com/slmason-gh/task-tracker-console.git
+    git clone https://github.com/slmason-gh/Task_Tracker.git
     ```
 2. Open the solution in Visual Studio.
 3. Build and run the project (F5 or Ctrl+F5).
