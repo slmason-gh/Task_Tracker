@@ -1,19 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Task_Tracker.Helpers;
 
 namespace Task_Tracker
 {
     /// <summary>
     /// A task, with its name and information
     /// </summary>
-    internal class TaskItem
+    internal sealed class TaskItem
     {
         // Task details
-        public string Title { get; set; }
-        public string Description { get; set; }
+        private string _title;
+        public string Title
+        {
+            get => _title;
+            set => _title = string.IsNullOrWhiteSpace(value) ? "Untitled" : value;
+        }
+
+        private string _description;
+        public string Description
+        {
+            get => _description;
+            set => _description = string.IsNullOrWhiteSpace(value) ? "None" : value;
+        }
+
         public TaskStatus Status { get; set; }
         public DateTime? DueDate { get; set; }
         public TaskPriority Priority { get; set; }
@@ -27,8 +36,8 @@ namespace Task_Tracker
             return String.Join("\n", new[]
             {
                 $"Task: {Title}",
-                $"Priority: {Priority}",
-                $"Status: {Status}",
+                $"Priority: {EnumHelper.GetDescription(Priority)}",
+                $"Status: {EnumHelper.GetDescription(Status)}",
                 $"Due: {(DueDate.HasValue ? DueDate.Value.ToShortDateString() : "N/A")}",
                 $"Description: {Description}"
             });
@@ -40,7 +49,7 @@ namespace Task_Tracker
         /// <returns>A string with the task title, priority and status</returns>
         public string GetShortDetails()
         {
-            return $"{Title} | Priority: {Priority} | Status: {Status}";
+            return $"{Title} | Priority: {EnumHelper.GetDescription(Priority)} | Status: {EnumHelper.GetDescription(Status)}";
         }
 
         /// <summary>
@@ -49,7 +58,7 @@ namespace Task_Tracker
         /// <returns>A string with the task title, priority, status and due date</returns>
         public override string ToString()
         {
-            return $"{Title} | Priority: {Priority} | Status: {Status} | Due: {(DueDate.HasValue ? DueDate.Value.ToShortDateString() : "N/A")}";
+            return $"{Title} | Priority: {EnumHelper.GetDescription(Priority)} | Status: {EnumHelper.GetDescription(Status)} | Due: {(DueDate.HasValue ? DueDate.Value.ToShortDateString() : "N/A")}";
         }
     }
 }

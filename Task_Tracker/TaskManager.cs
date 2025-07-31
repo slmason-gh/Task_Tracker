@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Task_Tracker.Helpers;
 
 namespace Task_Tracker
 {
@@ -15,7 +13,7 @@ namespace Task_Tracker
     {
 
         // List to store tasks
-        private List<TaskItem> tasks = new List<TaskItem>();
+        private readonly List<TaskItem> tasks = new List<TaskItem>();
 
         /// <summary>
         /// Print a message and wait for user input to continue
@@ -56,47 +54,6 @@ namespace Task_Tracker
             }
 
         }
-        /// <summary>
-        /// List values of an enum
-        /// </summary>
-        /// <typeparam name="T">An enumeration to be listed</typeparam>
-        private void ListEnumValues<T>()
-        {
-            // Print all enum values in a numbered list
-            var values = Enum.GetValues(typeof(T)).Cast<T>().ToList();
-            for (int i = 0; i < values.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {values[i]}");
-            }
-        }
-
-        /// <summary>
-        /// Choose a value from a list of enum values
-        /// </summary>
-        /// <returns>Index of the selected enum value, or -1 if invalid</returns>
-        /// <param name="message">Prompt message</param>
-        /// <param name="allowEmpty">Whether to allow empty input</param>
-        /// <typeparam name="T">An enumeration to be listed</typeparam>
-        private int? ChooseEnumValue<T>(string message = "Choose an option: ", bool allowEmpty = false)
-        {
-            ListEnumValues<T>();
-            Console.Write(message);
-            string input = Console.ReadLine();
-
-            // If input is empty and allowEmpty is true, return null; otherwise, return -1
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return allowEmpty ? (int?)null : -1;
-            }
-            // Try to parse the input as an integer
-            else if (int.TryParse(input, out int choice) &&
-                choice >= 1 && choice <= Enum.GetValues(typeof(T)).Length)
-            {
-                return choice - 1;
-            }
-            // If parsing fails or the choice is out of range, return -1
-            return -1;
-        }
 
         /// <summary>
         /// Add a new task
@@ -108,22 +65,31 @@ namespace Task_Tracker
 
             // Prompt user for task details
 
-            // Title and Description
-            Console.Write("Enter Title: ");
-            string title = Console.ReadLine();
-            Console.Write("Enter Description: ");
+            // Title
+            string title;
+            do
+            {
+                Console.Write("Enter Title: ");
+                title = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(title))
+                    Console.WriteLine("Title cannot be empty.");
+            } while (string.IsNullOrWhiteSpace(title));
+
+
+            // Description
+            Console.Write("Enter Description or leave empty for none: ");
             string description = Console.ReadLine();
 
             // Priority
             Console.WriteLine("Available priorities:");
-            int? priorityIndex = ChooseEnumValue<TaskPriority>("Enter Priority: ");
+            int? priorityIndex = EnumHelper.ChooseEnumValue<TaskPriority>("Enter Priority: ");
             TaskPriority priority = (priorityIndex.HasValue && priorityIndex.Value > -1)
                 ? (TaskPriority)priorityIndex.Value
                 : TaskPriority.Medium;
 
             // Status
             Console.WriteLine("Available statuses:");
-            int? statusIndex = ChooseEnumValue<TaskStatus>("Enter status: ");
+            int? statusIndex = EnumHelper.ChooseEnumValue<TaskStatus>("Enter status: ");
             TaskStatus status = (statusIndex.HasValue && statusIndex.Value > -1)
                 ? (TaskStatus)statusIndex.Value
                 : TaskStatus.Pending;
@@ -229,14 +195,14 @@ namespace Task_Tracker
                     task.Description = (!string.IsNullOrWhiteSpace(input)) ? input : task.Description;
 
                     // Priority
-                    Console.WriteLine($"Priority [{task.Priority}]: ");
-                    int? priorityIndex = ChooseEnumValue<TaskPriority>("Enter new priority (or leave empty to keep current): ", true);
+                    Console.WriteLine($"Priority [{EnumHelper.GetDescription(task.Priority)}]: ");
+                    int? priorityIndex = EnumHelper.ChooseEnumValue<TaskPriority>("Enter new priority (or leave empty to keep current): ", true);
                     if (priorityIndex.HasValue && priorityIndex.Value > -1)
                         task.Priority = (TaskPriority)priorityIndex.Value;
 
                     // Status
-                    Console.WriteLine($"Status [{task.Status}]: ");
-                    int? statusIndex = ChooseEnumValue<TaskStatus>("Enter new status (or leave empty to keep current): ", true);
+                    Console.WriteLine($"Status [{EnumHelper.GetDescription(task.Status)}]: ");
+                    int? statusIndex = EnumHelper.ChooseEnumValue<TaskStatus>("Enter new status (or leave empty to keep current): ", true);
                     if (statusIndex.HasValue && statusIndex.Value > -1)
                         task.Status = (TaskStatus)statusIndex.Value;
 
@@ -275,7 +241,7 @@ namespace Task_Tracker
                 if (taskIndex > -1)
                 {
                     // Prompt for confirmation
-                    Console.WriteLine($"Are you sure you want to remove the task: {tasks[taskIndex].Title}? (Y/N)");
+                    Console.Write($"Are you sure you want to remove the task: {tasks[taskIndex].Title}? (Y/N)");
                     string input = Console.ReadLine();
                     if (string.Equals(input, "Y", StringComparison.OrdinalIgnoreCase))
                     {
@@ -310,7 +276,7 @@ namespace Task_Tracker
 
             if (filterType == "1")
             {
-                int? statusIndex = ChooseEnumValue<TaskStatus>("Select status: ");
+                int? statusIndex = EnumHelper.ChooseEnumValue<TaskStatus>("Select status: ");
                 if (statusIndex.HasValue && statusIndex.Value > -1)
                 {
                     var status = (TaskStatus)statusIndex.Value;
@@ -326,9 +292,9 @@ namespace Task_Tracker
                     {
                         // Print the filtered tasks
                         Console.Clear();
-                        Console.WriteLine($"== TASKS FILTERED BY STATUS {status} == :");
+                        Console.WriteLine($"== TASKS FILTERED BY STATUS: {EnumHelper.GetDescription(status)} == ");
                         foreach (var task in filtered)
-                                Console.WriteLine(task);
+                            Console.WriteLine(task);
                     }
                 }
                 else
@@ -338,7 +304,7 @@ namespace Task_Tracker
             }
             else if (filterType == "2")
             {
-                int? priorityIndex = ChooseEnumValue<TaskPriority>("Select priority: ");
+                int? priorityIndex = EnumHelper.ChooseEnumValue<TaskPriority>("Select priority: ");
                 if (priorityIndex.HasValue && priorityIndex.Value > -1)
                 {
                     var priority = (TaskPriority)priorityIndex.Value;
@@ -354,7 +320,7 @@ namespace Task_Tracker
                     {
                         // Print the filtered tasks
                         Console.Clear();
-                        Console.WriteLine($"== TASKS FILTERED BY PRIORITY {priority} == :");
+                        Console.WriteLine($"== TASKS FILTERED BY PRIORITY: {EnumHelper.GetDescription(priority)} == ");
                         foreach (var task in filtered)
                             Console.WriteLine(task);
                     }
@@ -435,21 +401,18 @@ namespace Task_Tracker
                         continue; // Skip malformed lines
 
                     // Parse Priority
-                    TaskPriority priority;
-                    if (!Enum.TryParse(parts[2], out priority))
+                    if (!Enum.TryParse(parts[2], out TaskPriority priority))
                         priority = TaskPriority.Medium; // Default if invalid
 
                     // Parse Status
-                    TaskStatus status;
-                    if (!Enum.TryParse(parts[3], out status))
+                    if (!Enum.TryParse(parts[3], out TaskStatus status))
                         status = TaskStatus.Pending; // Default if invalid
 
                     // Parse DueDate
                     DateTime? dueDate = null;
                     if (!string.IsNullOrEmpty(parts[4]))
                     {
-                        DateTime parsedDate;
-                        if (DateTime.TryParse(parts[4], out parsedDate))
+                        if (DateTime.TryParse(parts[4], out DateTime parsedDate))
                             dueDate = parsedDate;
                     }
 

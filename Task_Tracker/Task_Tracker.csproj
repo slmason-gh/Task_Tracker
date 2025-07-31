@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnumHelper.cs" />
     <Compile Include="enums\TaskPriority.cs" />
     <Compile Include="enums\TaskStatus.cs" />
     <Compile Include="Program.cs" />
