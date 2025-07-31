@@ -37,14 +37,16 @@ A simple C# console application for tracking tasks, built to gain practical expe
 ## Key C# Concepts Demonstrated
 
 - **Classes & Objects:** `TaskManager`, `TaskItem`
-- **Enums:** `TaskPriority`, `TaskStatus`
+- **Enums with Descriptions:** `TaskPriority`, `TaskStatus` (using `[Description]` attributes)
 - **Collections:** `List<T>`
 - **LINQ:** Filtering and displaying tasks
 - **File I/O:** Saving and loading tasks
-- **Exception Handling:** Robust error messages for file operations
+- **Exception Handling:** Robust error messages for file operations and user input
 - **User Input:** Console prompts, validation, and confirmation
 - **Nullable Types:** Optional due dates
 - **Method Overriding:** Custom `ToString()` for task summaries
+- **Property Validation:** Centralized validation for title and description
+- **Static Helpers:** `EnumHelper` for enum display and selection
 
 ## Main Menu Example
 ```
