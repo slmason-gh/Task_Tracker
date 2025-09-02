@@ -8,7 +8,6 @@ A simple C# console application for tracking tasks, built to gain practical expe
 - Filter tasks by status or priority
 - View detailed or summary information for each task
 - Save tasks to and load tasks from a file
-- User-friendly prompts and input validation
 
 ## Getting Started
 
