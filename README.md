@@ -9,7 +9,6 @@ A simple C# console application for tracking tasks, built to gain practical expe
 - View detailed or summary information for each task
 - Save tasks to and load tasks from a file
 - User-friendly prompts and input validation
-- Demonstrates use of enums, nullable types, LINQ, and exception handling
 
 ## Getting Started
 
